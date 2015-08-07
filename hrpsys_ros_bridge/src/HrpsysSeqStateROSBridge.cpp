@@ -133,6 +133,7 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onInitialize() {
   }
   zmp_pub = nh.advertise<geometry_msgs::PointStamped>("/zmp", 10);
   cp_pub = nh.advertise<geometry_msgs::PointStamped>("/capture_point", 10);
+  cpref_pub = nh.advertise<geometry_msgs::PointStamped>("/ref_capture_point", 10);
   cop_pub.resize(m_mcforceName.size());
   for (unsigned int i=0; i<m_mcforceName.size(); i++){
     std::string tmpname(m_mcforceName[i]); // "ref_xx"
@@ -773,6 +774,27 @@ RTC::ReturnCode_t HrpsysSeqStateROSBridge::onExecute(RTC::UniqueId ec_id)
       cpv.point.y = m_rscp.data.y;
       cpv.point.z = m_rscp.data.z;
       cp_pub.publish(cpv);
+    }
+    catch(const std::runtime_error &e)
+      {
+        ROS_ERROR_STREAM("[" << getInstanceName() << "] " << e.what());
+      }
+  }
+
+  if ( m_rscprefIn.isNew() ) {
+    try {
+      m_rscprefIn.read();
+      geometry_msgs::PointStamped cprefv;
+      if ( use_hrpsys_time ) {
+        cprefv.header.stamp = ros::Time(m_rscpref.tm.sec, m_rscpref.tm.nsec);
+      }else{
+        cprefv.header.stamp = tm_on_execute;
+      }
+      cprefv.header.frame_id = rootlink_name;
+      cprefv.point.x = m_rscpref.data.x;
+      cprefv.point.y = m_rscpref.data.y;
+      cprefv.point.z = m_rscpref.data.z;
+      cpref_pub.publish(cprefv);
     }
     catch(const std::runtime_error &e)
       {

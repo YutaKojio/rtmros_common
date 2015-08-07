@@ -136,6 +136,8 @@ class HrpsysSeqStateROSBridgeImpl  : public RTC::DataFlowComponentBase
   InPort<TimedPoint3D> m_rszmpIn;
   TimedPoint3D m_rscp;
   InPort<TimedPoint3D> m_rscpIn;
+  TimedPoint3D m_rscpref;
+  InPort<TimedPoint3D> m_rscprefIn;
   TimedDoubleSeq m_rsCOPInfo;
   InPort<TimedDoubleSeq> m_rsCOPInfoIn;
   TimedLong m_emergencyMode;

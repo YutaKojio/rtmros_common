@@ -33,6 +33,8 @@
                      #'send self :rtmros-emergency-mode-callback :groupname groupname)
      (ros::subscribe "/capture_point" geometry_msgs::PointStamped
                      #'send self :rtmros-capture-point-callback :groupname groupname)
+     (ros::subscribe "/ref_capture_point" geometry_msgs::PointStamped
+                     #'send self :rtmros-ref-capture-point-callback :groupname groupname)
      ))
   (:rtmros-motor-states-callback
    (msg)
@@ -66,6 +68,10 @@
    (msg)
    (let ((p (send msg :point)))
      (send self :set-robot-state1 :capture-point (float-vector (send p :x) (send p :y) (send p :z)))))
+  (:rtmros-ref-capture-point-callback
+   (msg)
+   (let ((p (send msg :point)))
+     (send self :set-robot-state1 :ref-capture-point (float-vector (send p :x) (send p :y) (send p :z)))))
   (:tmp-force-moment-vector-for-limb
    (f/m fsensor-name &optional (topic-name-prefix nil)) ;; topic-name-prefix is "off" or "reference"
    (let ((key-name (if topic-name-prefix
@@ -148,6 +154,14 @@
    "Returns capture-point vector [mm].
     If wrt is :local, returns capture-point in the base-link frame. If wrt is :world, returns capture-point in the world frame."
    (let ((cp (scale 1e3 (cdr (assoc :capture-point robot-state))))) ;; [m] -> [mm]
+     (case wrt
+       (:local cp)
+       (:world (send (car (send robot :links)) :transform-vector cp)))))
+  (:ref-capture-point-vector
+   (&optional (wrt :local))
+   "Returns capture-point vector [mm].
+    If wrt is :local, returns capture-point in the base-link frame. If wrt is :world, returns capture-point in the world frame."
+   (let ((cp (scale 1e3 (cdr (assoc :ref-capture-point robot-state))))) ;; [m] -> [mm]
      (case wrt
        (:local cp)
        (:world (send (car (send robot :links)) :transform-vector cp)))))
