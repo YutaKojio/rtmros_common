@@ -1212,6 +1212,41 @@
                  step-height-list step-time-list toe-angle-list heel-angle-list)
          :overwrite_fs_idx overwrite-footstep-index
          ))
+  (:set-foot-steps-force-with-param-no-wait
+   (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list rleg-force-list lleg-force-list &key (overwrite-footstep-index 0))
+   "Set foot step with step parameter and do not wait for step finish.
+    foot-step-list is list of footstep (only biped) or list of list of footstep.
+    step-height-list is list of step height (only biped) or list of list of step height.
+    step-time-list is list of step time (only biped) or list of list of step time.
+    toe-angle-list is list of toe angle (only biped) or list of list of toe angle.
+    heel-angle-list is list of heel angle (only biped) or list of list of heel angle."
+   (unless (listp (car foot-step-list))
+     (setq foot-step-list (mapcar #'(lambda (fs) (list fs)) foot-step-list)
+           step-height-list (mapcar #'(lambda (sh) (list sh)) step-height-list)
+           step-time-list (mapcar #'(lambda (st) (list st)) step-time-list)
+           toe-angle-list (mapcar #'(lambda (ta) (list ta)) toe-angle-list)
+           heel-angle-list (mapcar #'(lambda (ha) (list ha)) heel-angle-list)
+           rleg-force-list (mapcar #'(lambda (rf) (list rf)) rleg-force-list)
+           lleg-force-list (mapcar #'(lambda (lf) (list lf)) lleg-force-list)))
+   (send self :autobalancerservice_setfootstepsforcewithparam
+         :fss
+         (mapcar #'(lambda (fs)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_footsteps :init
+                               :fs
+                               (mapcar #'(lambda (f)
+                                           (send self :eus-footstep->abc-footstep f))
+                                       fs)))
+                 foot-step-list)
+         :sfpss
+         (mapcar #'(lambda (shs sts tas has rfs lfs)
+                     (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepforceparams :init
+                               :sfps
+                               (mapcar #'(lambda (sh st ta ha rf lf)
+                                           (instance hrpsys_ros_bridge::openhrp_autobalancerservice_stepforceparam :init :step_height (* sh 1e-3) :step_time st :toe_angle ta :heel_angle ha :rleg_force rf :lleg_force lf))
+                                       shs sts tas has rfs lfs)))
+                 step-height-list step-time-list toe-angle-list heel-angle-list rleg-force-list lleg-force-list)
+         :overwrite_fs_idx overwrite-footstep-index
+         ))
   (:set-foot-steps-with-param
    (foot-step-list step-height-list step-time-list toe-angle-list heel-angle-list &key (overwrite-footstep-index 0))
    "Set foot step with step parameter and wait for step finish.
