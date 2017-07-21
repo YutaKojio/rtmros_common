@@ -1619,7 +1619,7 @@
   (:set-st-param
    (&rest args
     &key st-algorithm
-         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const eefm-swing-pos-spring-gain eefm-swing-pos-time-const eefm-swing-rot-spring-gain eefm-swing-rot-time-const eefm-ee-forcemoment-distribution-weight
+         eefm-pos-damping-gain eefm-rot-damping-gain eefm-pos-time-const-support eefm-rot-time-const eefm-swing-pos-spring-gain eefm-swing-pos-time-const eefm-swing-rot-spring-gain eefm-swing-rot-time-const eefm-ee-forcemoment-distribution-weight eefm-d-foot-rpy-ratio
     &allow-other-keys)
    "Set Stabilizer parameters.
     For arguments, please see (send *ri* :get-st-param-arguments)."
@@ -1672,6 +1672,10 @@
                  (let ((tmp (send prm :eefm_ee_forcemoment_distribution_weight)))
                    (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-ee-forcemoment-distribution-weight))
                    (list :eefm-ee-forcemoment-distribution-weight tmp)))
+             (if (and (memq :eefm-d-foot-rpy-ratio args) eefm-d-foot-rpy-ratio)
+                 (let ((tmp (send prm :eefm_d_foot_rpy_ratio)))
+                   (setq (tmp . ros::_data) (apply #'concatenate float-vector eefm-d-foot-rpy-ratio))
+                   (list :eefm-d-foot-rpy-ratio tmp)))
              args))))
   (:set-st-param-for-non-feedback-LIP-mode
    ()
